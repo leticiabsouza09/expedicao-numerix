@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expedição Numerix — Caça ao Tesouro Matemático</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --jungle:#0F3D3E;
+    --jungle-deep:#0A2C2D;
+    --gold:#D9A22A;
+    --coral:#E8634F;
+    --sand:#F2E2B8;
+    --ink:#1B2A2F;
+    --teal-light:#1F6B66;
+    --good:#5FAE6C;
+    --bad:#D9534F;
+    --font-display:'Baloo 2', sans-serif;
+    --font-body:'Nunito', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--font-body);
+    background:
+      radial-gradient(circle at 15% 20%, rgba(217,162,42,0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(232,99,79,0.08), transparent 40%),
+      var(--jungle);
+    color:var(--sand);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  #app{max-width:1080px;margin:0 auto;padding:24px 24px 70px;position:relative; font-size:1.15rem;}
+
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:14px; flex-wrap:wrap; gap:10px;
+  }
+  .brand{
+    font-family:var(--font-display);
+    font-weight:800;
+    font-size:2.1rem;
+    color:var(--gold);
+    letter-spacing:0.5px;
+    display:flex;align-items:center;gap:10px;
+    cursor:pointer;
+  }
+  .brand .compass{
+    display:inline-block;
+    width:42px;height:42px;
+    animation:spin 8s linear infinite;
+  }
+  @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  .stats{
+    display:flex;gap:10px;
+    font-family:var(--font-display);
+    font-weight:700;
+  }
+  .pill{
+    background:rgba(0,0,0,0.25);
+    border:2px solid rgba(217,162,42,0.4);
+    border-radius:999px;
+    padding:10px 20px;
+    font-size:1.3rem;
+    display:flex;align-items:center;gap:8px;
+    color:var(--sand);
+  }
+  .pill.hearts{color:#FF8B7E;}
+  .pill.gems{color:#7FE3D6;}
+  .pill.grade{color:var(--gold); cursor:pointer;}
+
+  .map-title{
+    text-align:center;
+    font-family:var(--font-display);
+    font-size:1.5rem;
+    color:var(--sand);
+    opacity:0.85;
+    margin:10px 0 30px;
+  }
+  .map-wrap{position:relative; padding:10px 0 30px;}
+  .islands{
+    display:flex; flex-direction:column; gap:14px; position:relative; z-index:2;
+  }
+  .island-row{display:flex; align-items:center; gap:26px;}
+  .island-row.reverse{flex-direction:row-reverse;}
+  .island-btn{
+    width:150px;height:150px;border-radius:50%;
+    border:5px solid var(--gold);
+    background:linear-gradient(160deg,var(--teal-light),var(--jungle-deep));
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    cursor:pointer; flex-shrink:0;
+    font-family:var(--font-display); color:var(--sand);
+    transition:transform .15s ease, box-shadow .15s ease;
+    box-shadow:0 8px 0 rgba(0,0,0,0.35);
+    position:relative;
+  }
+  .island-btn:hover{transform:translateY(-3px);}
+  .island-btn:active{transform:translateY(2px); box-shadow:0 3px 0 rgba(0,0,0,0.35);}
+  .island-btn .emoji{font-size:3rem;}
+  .island-btn .lbl{font-size:0.95rem;font-weight:700;text-align:center;padding:0 10px;line-height:1.2;margin-top:4px;}
+  .island-btn.locked{
+    border-color:#5a6b63; filter:grayscale(0.6); cursor:not-allowed; opacity:0.55;
+  }
+  .island-btn.locked:hover{transform:none;}
+  .island-btn.done{border-color:var(--good); box-shadow:0 8px 0 rgba(0,0,0,0.35), 0 0 0 5px rgba(95,174,108,0.25);}
+  .island-btn .stars-mini{
+    position:absolute; bottom:-16px; display:flex; gap:2px; background:var(--jungle-deep);
+    border-radius:10px; padding:4px 10px; border:2px solid var(--gold); font-size:1rem;
+  }
+  .island-caption{
+    font-family:var(--font-body); font-weight:700; font-size:1.15rem; color:var(--sand); opacity:0.85; max-width:220px;
+  }
+
+  /* ---------- SELEÇÃO DE SÉRIE ---------- */
+  .grade-grid{
+    display:grid; grid-template-columns:repeat(2,1fr); gap:24px; margin-top:36px;
+  }
+  @media (max-width:480px){.grade-grid{grid-template-columns:1fr;}}
+  .grade-card{
+    background:linear-gradient(160deg, rgba(255,255,255,0.06), rgba(0,0,0,0.15));
+    border:3px solid var(--gold);
+    border-radius:24px;
+    padding:34px 24px;
+    text-align:center;
+    cursor:pointer;
+    transition:transform .15s ease;
+  }
+  .grade-card:hover{transform:translateY(-4px);}
+  .grade-card .num{
+    font-family:var(--font-display); font-size:4rem; color:var(--gold); font-weight:800; line-height:1;
+  }
+  .grade-card .lbl{font-family:var(--font-display); font-size:1.5rem; margin:8px 0 12px;}
+  .grade-card .desc{font-size:1.1rem; opacity:0.85; line-height:1.5;}
+
+  .quiz-card{
+    background:linear-gradient(160deg, rgba(255,255,255,0.06), rgba(0,0,0,0.15));
+    border:3px solid var(--gold);
+    border-radius:26px;
+    padding:36px 32px;
+    position:relative;
+    animation:popin .35s ease;
+  }
+  @keyframes popin{from{opacity:0; transform:scale(.95)}to{opacity:1; transform:scale(1)}}
+  .quiz-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;}
+  .progress-track{
+    flex:1; height:16px; background:rgba(0,0,0,0.3); border-radius:8px; overflow:hidden; min-width:160px;
+  }
+  .progress-fill{height:100%; background:linear-gradient(90deg,var(--coral),var(--gold)); transition:width .3s ease;}
+  .question-text{
+    font-family:var(--font-display);
+    font-size:2rem;
+    line-height:1.4;
+    color:#fff;
+    margin:20px 0 30px;
+    text-align:center;
+  }
+  .options{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:600px){.options{grid-template-columns:1fr;}}
+  .opt-btn{
+    font-family:var(--font-body); font-weight:800; font-size:1.4rem;
+    background:rgba(255,255,255,0.08);
+    border:3px solid rgba(217,162,42,0.5);
+    color:var(--sand);
+    border-radius:16px;
+    padding:22px 14px;
+    cursor:pointer;
+    transition:transform .12s ease, background .2s ease, border-color .2s ease;
+  }
+  .opt-btn:hover:not(:disabled){transform:translateY(-2px); border-color:var(--gold);}
+  .opt-btn:disabled{cursor:default;}
+  .opt-btn.correct{background:rgba(95,174,108,0.35); border-color:var(--good); color:#fff;}
+  .opt-btn.wrong{background:rgba(217,83,79,0.35); border-color:var(--bad); color:#fff;}
+  .feedback{
+    text-align:center; font-family:var(--font-display); font-weight:700; margin-top:24px; min-height:2rem; font-size:1.4rem;
+  }
+  .feedback.good{color:#9EE6A8;}
+  .feedback.bad{color:#FFA39C;}
+  .quiz-footer{display:flex; justify-content:space-between; margin-top:24px;}
+  .btn{
+    font-family:var(--font-display); font-weight:700;
+    border:none; border-radius:14px; padding:14px 26px; cursor:pointer;
+    background:var(--gold); color:var(--jungle-deep);
+    font-size:1.2rem;
+    transition:transform .12s ease;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn.ghost{background:transparent; border:2px solid var(--sand); color:var(--sand);}
+
+  .result-card{text-align:center; padding:30px 18px;}
+  .trophy{font-size:4rem; display:block; margin-bottom:8px;}
+  .result-title{font-family:var(--font-display); font-size:1.7rem; color:var(--gold); margin-bottom:6px;}
+  .stars-big{font-size:2rem; margin:10px 0;}
+  .result-stats{font-family:var(--font-body); font-weight:700; margin:10px 0 22px; opacity:0.9;}
+
+  footer.note{
+    text-align:center; font-size:0.75rem; opacity:0.5; margin-top:30px;
+  }
+
+  .hidden{display:none !important;}
+
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .shake{animation:shake .3s ease;}
+
+  .confetti-piece{
+    position:fixed; top:-10px; width:8px; height:14px; opacity:0.9; z-index:50;
+    animation:fall linear forwards;
+  }
+  @keyframes fall{
+    to{transform:translateY(110vh) rotate(540deg); opacity:0.2;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="topbar">
+    <div class="brand" id="brandLogo">
+      <svg class="compass" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#D9A22A" stroke-width="2"/><path d="M12 4 L14 12 L12 20 L10 12 Z" fill="#D9A22A"/></svg>
+      Expedição Numerix
+    </div>
+    <div class="stats">
+      <div class="pill grade hidden" id="gradePill">6º ano</div>
+      <div class="pill gems">💎 <span id="gemCount">0</span></div>
+      <div class="pill hearts" id="heartsPill">❤️❤️❤️</div>
+    </div>
+  </div>
+
+  <div id="gradeView">
+    <p class="map-title">Escolha sua série para começar a expedição:</p>
+    <div class="grade-grid" id="gradeGrid"></div>
+  </div>
+
+  <div id="mapView" class="hidden">
+    <p class="map-title">Escolha uma ilha para explorar e desvende os desafios matemáticos →</p>
+    <div class="map-wrap">
+      <div class="islands" id="islandsList"></div>
+    </div>
+  </div>
+
+  <div id="quizView" class="hidden">
+    <div class="quiz-card">
+      <div class="quiz-top">
+        <button class="btn ghost" id="backBtn">← Mapa</button>
+        <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="pill" id="qCounter">1/6</div>
+      </div>
+      <div class="question-text" id="questionText">Pergunta</div>
+      <div class="options" id="optionsList"></div>
+      <div class="feedback" id="feedback"></div>
+      <div class="quiz-footer">
+        <span></span>
+        <button class="btn hidden" id="nextBtn">Próxima →</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="resultView" class="hidden">
+    <div class="quiz-card result-card">
+      <span class="trophy" id="trophyEmoji">🏆</span>
+      <div class="result-title" id="resultTitle">Ilha concluída!</div>
+      <div class="stars-big" id="resultStars">⭐⭐⭐</div>
+      <div class="result-stats" id="resultStats"></div>
+      <button class="btn" id="continueBtn">Voltar ao mapa</button>
+    </div>
+  </div>
+
+  <footer class="note">Expedição Numerix · um jogo para praticar matemática do 6º ao 9º ano</footer>
+</div>
+
+<script>
+(function(){
+
+/* ============ CONTEÚDO POR SÉRIE (BNCC, visão geral) ============ */
+const GRADES = {
+  6: {
+    label:'6º ano', desc:'Números, frações iniciais e geometria básica',
+    islands:[
+      { id:'g6-numeros', emoji:'🔢', name:'Números Naturais', caption:'Operações, múltiplos e divisores',
+        pool:[
+          {q:'7 + 8 × 2 = ?', opts:['23','30','15','16'], a:0},
+          {q:'Qual número é múltiplo de 5?', opts:['22','35','41','53'], a:1},
+          {q:'Qual número é divisor de 12?', opts:['5','7','4','9'], a:2},
+          {q:'45 ÷ 9 = ?', opts:['4','5','6','9'], a:1},
+          {q:'Qual destes números é primo?', opts:['9','15','17','21'], a:2},
+          {q:'6 × 7 = ?', opts:['36','42','48','40'], a:1},
+          {q:'O resto da divisão de 17 por 5 é:', opts:['1','2','3','4'], a:1},
+          {q:'Qual é o menor múltiplo comum de 4 e 6?', opts:['8','10','12','24'], a:2},
+        ]},
+      { id:'g6-fracoes', emoji:'🍰', name:'Frações Iniciais', caption:'Representação e comparação',
+        pool:[
+          {q:'Qual fração representa "3 partes de um total de 4"?', opts:['4/3','3/4','1/3','3/1'], a:1},
+          {q:'1/2 é igual a:', opts:['0,2','0,5','0,12','5'], a:1},
+          {q:'Qual fração é maior: 1/2 ou 1/4?', opts:['1/2','1/4','são iguais','depende'], a:0},
+          {q:'1/4 + 1/4 = ?', opts:['1/2','2/8','1/8','2/4 e 1/2 estão certas'], a:3},
+          {q:'Em uma pizza de 8 pedaços, comer 2 pedaços é comer:', opts:['1/8','1/4','2/4','1/2'], a:1},
+          {q:'Qual fração representa a metade de 10?', opts:['10/2 = 5','1/10','2/10','10/1'], a:0},
+          {q:'3/6 simplificada é:', opts:['1/3','1/2','2/3','3/2'], a:1},
+          {q:'Qual é maior: 2/3 ou 1/3?', opts:['2/3','1/3','iguais','não dá pra saber'], a:0},
+        ]},
+      { id:'g6-geometria', emoji:'📐', name:'Geometria Básica', caption:'Perímetro, área e ângulos',
+        pool:[
+          {q:'Perímetro de um quadrado de lado 5 cm:', opts:['10 cm','20 cm','25 cm','15 cm'], a:1},
+          {q:'Área de um quadrado de lado 4 cm:', opts:['8 cm²','16 cm²','12 cm²','4 cm²'], a:1},
+          {q:'Quantos lados tem um triângulo?', opts:['2','3','4','5'], a:1},
+          {q:'Um ângulo menor que 90° é chamado de:', opts:['reto','obtuso','agudo','raso'], a:2},
+          {q:'Perímetro de um retângulo 6×3:', opts:['9','18','24','27'], a:1},
+          {q:'Quantos lados tem um pentágono?', opts:['4','5','6','7'], a:1},
+          {q:'Uma figura com 4 lados iguais e 4 ângulos retos é um:', opts:['triângulo','quadrado','círculo','hexágono'], a:1},
+          {q:'O ângulo de uma volta completa mede:', opts:['90°','180°','270°','360°'], a:3},
+        ]},
+      { id:'g6-estatistica', emoji:'📊', name:'Estatística Simples', caption:'Leitura de gráficos e média',
+        pool:[
+          {q:'A média de 4, 6 e 8 é:', opts:['5','6','7','8'], a:2},
+          {q:'Se em 5 provas as notas foram 6,7,8,9,10, a soma é:', opts:['38','40','42','44'], a:1},
+          {q:'Em um gráfico de barras, a barra mais alta representa:', opts:['o menor valor','o maior valor','a média','o total'], a:1},
+          {q:'A média de 10 e 20 é:', opts:['10','15','20','30'], a:1},
+          {q:'Se todos os valores de uma lista são iguais a 7, a média é:', opts:['0','1','7','14'], a:2},
+          {q:'Qual gráfico é mais usado para mostrar partes de um total?', opts:['linha','barras','pizza (setores)','dispersão'], a:2},
+        ]},
+      { id:'g6-final', emoji:'🗝️', name:'Tesouro do 6º ano', caption:'Desafio misto da série',
+        pool:[
+          {q:'8 × 9 = ?', opts:['62','72','81','64'], a:1},
+          {q:'Qual fração é equivalente a 1/2?', opts:['2/3','2/4','3/4','1/3'], a:1},
+          {q:'Perímetro de um triângulo equilátero de lado 4:', opts:['8','12','16','4'], a:1},
+          {q:'A média de 2, 4 e 6 é:', opts:['3','4','6','12'], a:1},
+          {q:'Qual número é primo: 21 ou 23?', opts:['21','23','ambos','nenhum'], a:1},
+          {q:'3/4 é maior, menor ou igual a 1/2?', opts:['maior','menor','igual','impossível saber'], a:0},
+        ]},
+    ]
+  },
+  7: {
+    label:'7º ano', desc:'Inteiros, frações, proporção e álgebra inicial',
+    islands:[
+      { id:'g7-inteiros', emoji:'➕', name:'Números Inteiros', caption:'Operações com positivos e negativos',
+        pool:[
+          {q:'(-8) + 15 = ?', opts:['7','-7','23','-23'], a:0},
+          {q:'12 − (−5) = ?', opts:['7','17','-17','-7'], a:1},
+          {q:'(-6) × (-3) = ?', opts:['-18','18','9','-9'], a:1},
+          {q:'(-20) ÷ 4 = ?', opts:['-5','5','-16','16'], a:0},
+          {q:'(-9) + (-4) = ?', opts:['13','-13','5','-5'], a:1},
+          {q:'Qual número é o oposto de -15?', opts:['-15','0','15','1/15'], a:2},
+          {q:'(2 + 3) × (5 − 2) = ?', opts:['13','15','17','25'], a:1},
+          {q:'(-3)³ = ?', opts:['9','-9','27','-27'], a:3},
+        ]},
+      { id:'g7-fracoes', emoji:'🍰', name:'Frações e Decimais', caption:'Operações e conversões',
+        pool:[
+          {q:'1/2 + 1/4 = ?', opts:['2/6','3/4','1/6','2/4'], a:1},
+          {q:'2/3 × 3/5 = ?', opts:['6/15','5/8','2/5','6/8'], a:0},
+          {q:'0,75 em fração é:', opts:['3/4','7/5','75/10','3/5'], a:0},
+          {q:'1 − 2/5 = ?', opts:['3/5','2/5','1/5','4/5'], a:0},
+          {q:'5/8 ÷ 1/4 = ?', opts:['5/2','5/32','20/8','2/5'], a:0},
+          {q:'0,2 + 0,35 = ?', opts:['0,55','0,37','0,45','0,4'], a:0},
+          {q:'Qual fração é equivalente a 2/6?', opts:['1/4','1/3','2/3','3/6'], a:1},
+          {q:'4/5 − 1/5 = ?', opts:['3/5','5/5','3/10','1'], a:0},
+        ]},
+      { id:'g7-proporcao', emoji:'⚖️', name:'Proporção e %', caption:'Razão, proporção e porcentagem',
+        pool:[
+          {q:'20% de 50 é:', opts:['10','15','5','20'], a:0},
+          {q:'50% de 200 é:', opts:['50','100','150','25'], a:1},
+          {q:'Qual razão é equivalente a 3:4?', opts:['6:8','3:5','4:3','9:16'], a:0},
+          {q:'Se 30 é 50% de um número, esse número é:', opts:['15','60','45','90'], a:1},
+          {q:'10% de 90 é:', opts:['9','10','19','90'], a:0},
+          {q:'2 em 8 corresponde a quantos %?', opts:['20%','25%','40%','16%'], a:1},
+          {q:'75% equivale à fração:', opts:['3/4','7/5','3/5','1/4'], a:0},
+        ]},
+      { id:'g7-algebra', emoji:'🧩', name:'Álgebra Inicial', caption:'Expressões e equações simples',
+        pool:[
+          {q:'Se x + 7 = 12, então x = ?', opts:['5','19','-5','7'], a:0},
+          {q:'Se 3x = 21, então x = ?', opts:['18','24','7','3'], a:2},
+          {q:'Simplifique: 2x + 3x', opts:['5x','6x','x','2x³'], a:0},
+          {q:'Se 2x − 4 = 10, x = ?', opts:['3','7','6','10'], a:1},
+          {q:'Qual expressão representa "o dobro de um número mais 3"?', opts:['n+3','2n+3','3n+2','n²+3'], a:1},
+          {q:'Se y − 5 = -2, y = ?', opts:['3','-7','7','-3'], a:0},
+        ]},
+      { id:'g7-final', emoji:'🗝️', name:'Tesouro do 7º ano', caption:'Desafio misto da série',
+        pool:[
+          {q:'(-4) × 5 + 10 = ?', opts:['-10','30','-30','10'], a:0},
+          {q:'3/5 de 25 é:', opts:['10','15','20','5'], a:1},
+          {q:'Se 5x = 35, x = ?', opts:['5','6','7','8'], a:2},
+          {q:'25% de 120 é:', opts:['25','30','35','40'], a:1},
+          {q:'1/3 + 1/6 = ?', opts:['1/2','2/9','1/9','2/3'], a:0},
+          {q:'Se y + 9 = 4, y = ?', opts:['5','-5','13','-13'], a:1},
+        ]},
+    ]
+  },
+  8: {
+    label:'8º ano', desc:'Álgebra, Pitágoras, porcentagem e juros',
+    islands:[
+      { id:'g8-algebra', emoji:'🧩', name:'Álgebra', caption:'Equações e produtos notáveis',
+        pool:[
+          {q:'(x + 2)(x) quando x=3 vale:', opts:['15','9','5','11'], a:0},
+          {q:'Qual é o termo independente em 5x + 9?', opts:['5','x','9','5x'], a:2},
+          {q:'4(x − 1) = 0 → x = ?', opts:['0','1','4','-1'], a:1},
+          {q:'Se 2(x + 1) = 8, x = ?', opts:['3','4','2','5'], a:0},
+          {q:'(x+1)² é igual a:', opts:['x²+1','x²+2x+1','x²+x+1','2x+1'], a:1},
+          {q:'Qual é o coeficiente de x em 7x − 2?', opts:['-2','7','x','5'], a:1},
+          {q:'Se x² = 49, x pode ser:', opts:['6','7','8','9'], a:1},
+        ]},
+      { id:'g8-geometria', emoji:'📐', name:'Geometria e Pitágoras', caption:'Teorema de Pitágoras e polígonos',
+        pool:[
+          {q:'Em um triângulo retângulo com catetos 3 e 4, a hipotenusa é:', opts:['5','6','7','12'], a:0},
+          {q:'Soma dos ângulos internos de um triângulo:', opts:['90°','180°','270°','360°'], a:1},
+          {q:'Se a hipotenusa é 10 e um cateto é 6, o outro cateto é:', opts:['6','7','8','9'], a:2},
+          {q:'Quantos lados tem um hexágono?', opts:['5','6','7','8'], a:1},
+          {q:'Um triângulo com os três lados iguais é:', opts:['isósceles','escaleno','equilátero','retângulo'], a:2},
+          {q:'Área de um triângulo de base 8 e altura 5:', opts:['40','20','13','24'], a:1},
+        ]},
+      { id:'g8-porcentagem', emoji:'💰', name:'Porcentagem e Juros', caption:'Descontos, aumentos e juros simples',
+        pool:[
+          {q:'Se algo custa R$80 com 25% de desconto, o desconto é:', opts:['R$15','R$20','R$25','R$10'], a:1},
+          {q:'Aumento de 10% sobre R$100 resulta em:', opts:['R$100','R$110','R$90','R$120'], a:1},
+          {q:'150% de 40 é:', opts:['50','60','45','55'], a:1},
+          {q:'Juro simples de R$200 a 5% ao mês, em 1 mês:', opts:['R$5','R$10','R$20','R$50'], a:1},
+          {q:'Se uma prova tem 20 questões e o aluno acertou 90%, quantas acertou?', opts:['16','18','19','20'], a:1},
+          {q:'Qual fração representa 40%?', opts:['2/5','4/100','4/10','ambas a e c'], a:3},
+        ]},
+      { id:'g8-numeros', emoji:'🔢', name:'Potências e Raízes', caption:'Potenciação e radiciação',
+        pool:[
+          {q:'Qual o valor de 7²?', opts:['14','21','49','77'], a:2},
+          {q:'Raiz quadrada de 81 é:', opts:['8','9','18','41'], a:1},
+          {q:'2³ × 2² = ?', opts:['2⁵','2⁶','4⁵','16'], a:0},
+          {q:'(-2)² = ?', opts:['-4','4','-2','2'], a:1},
+          {q:'Raiz quadrada de 144 é:', opts:['11','12','13','14'], a:1},
+        ]},
+      { id:'g8-final', emoji:'🗝️', name:'Tesouro do 8º ano', caption:'Desafio misto da série',
+        pool:[
+          {q:'Hipotenusa de um triângulo com catetos 6 e 8:', opts:['9','10','12','14'], a:1},
+          {q:'25% de 200 é:', opts:['25','50','75','100'], a:1},
+          {q:'Se 3x − 1 = 11, x = ?', opts:['3','4','5','6'], a:1},
+          {q:'Raiz quadrada de 100:', opts:['9','10','11','20'], a:1},
+          {q:'Área de um quadrado de lado 9:', opts:['18','81','36','72'], a:1},
+        ]},
+    ]
+  },
+  9: {
+    label:'9º ano', desc:'Potências, funções, geometria avançada e estatística',
+    islands:[
+      { id:'g9-potencias', emoji:'🔢', name:'Potências e Radiciação', caption:'Propriedades avançadas',
+        pool:[
+          {q:'2⁻¹ = ?', opts:['-2','1/2','2','0'], a:1},
+          {q:'Raiz cúbica de 27:', opts:['2','3','9','27'], a:1},
+          {q:'(2³)² = ?', opts:['2⁵','2⁶','64','64 e 2⁶'], a:3},
+          {q:'5⁰ = ?', opts:['0','1','5','50'], a:1},
+          {q:'√50 está entre:', opts:['5 e 6','6 e 7','7 e 8','8 e 9'], a:1},
+          {q:'(-3)⁴ = ?', opts:['-81','81','-12','12'], a:1},
+        ]},
+      { id:'g9-funcoes', emoji:'📈', name:'Funções', caption:'Plano cartesiano e funções lineares',
+        pool:[
+          {q:'No plano cartesiano, o ponto (3,0) está sobre o eixo:', opts:['x','y','origem','nenhum'], a:0},
+          {q:'Na função y = 2x + 1, se x = 3, y = ?', opts:['5','6','7','8'], a:2},
+          {q:'O ponto (0,0) é chamado de:', opts:['eixo','origem','quadrante','vértice'], a:1},
+          {q:'Na função y = x − 4, se y = 0, x = ?', opts:['0','4','-4','1'], a:1},
+          {q:'Quantos quadrantes tem o plano cartesiano?', opts:['2','3','4','6'], a:2},
+        ]},
+      { id:'g9-geometria', emoji:'📐', name:'Geometria Avançada', caption:'Áreas compostas, círculos e Pitágoras',
+        pool:[
+          {q:'Área de um círculo de raio 2 (use π≈3,14):', opts:['6,28','12,56','9,42','3,14'], a:1},
+          {q:'Em um triângulo retângulo com catetos 5 e 12, a hipotenusa é:', opts:['13','14','15','17'], a:0},
+          {q:'Diâmetro é igual a:', opts:['1× o raio','2× o raio','3× o raio','metade do raio'], a:1},
+          {q:'Soma dos ângulos internos de um quadrilátero:', opts:['180°','270°','360°','450°'], a:2},
+          {q:'Área de um trapézio com bases 4 e 6 e altura 3:', opts:['12','15','18','30'], a:1},
+        ]},
+      { id:'g9-estatistica', emoji:'📊', name:'Estatística e Probabilidade', caption:'Médias, moda e chances',
+        pool:[
+          {q:'A probabilidade de tirar "cara" em uma moeda honesta é:', opts:['25%','50%','75%','100%'], a:1},
+          {q:'A moda de 2,2,3,4,5 é:', opts:['2','3','4','5'], a:0},
+          {q:'A mediana de 1,3,5,7,9 é:', opts:['3','5','7','9'], a:1},
+          {q:'Em um dado de 6 faces, a chance de sair "5" é:', opts:['1/2','1/3','1/6','1/5'], a:2},
+          {q:'A média de 10, 20 e 30 é:', opts:['15','20','25','30'], a:1},
+        ]},
+      { id:'g9-final', emoji:'🗝️', name:'Tesouro do 9º ano', caption:'Desafio misto da série',
+        pool:[
+          {q:'√64 = ?', opts:['6','7','8','9'], a:2},
+          {q:'Na função y = 3x, se x = 4, y = ?', opts:['7','12','34','43'], a:1},
+          {q:'Hipotenusa de catetos 9 e 12:', opts:['13','14','15','16'], a:2},
+          {q:'A moda de 1,1,2,3,3,3 é:', opts:['1','2','3','não tem'], a:2},
+          {q:'2⁴ = ?', opts:['8','16','32','64'], a:1},
+        ]},
+    ]
+  },
+};
+
+const QUESTIONS_PER_ROUND = 6;
+const STATE = {
+  grade:null,
+  unlocked:0,
+  hearts:3,
+  gems:0,
+  islandStars:{},
+  current:null,
+  quizQuestions:[],
+  qIndex:0,
+  correctCount:0,
+  answered:false,
+};
+
+const $ = id => document.getElementById(id);
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function buildShuffledOptions(item){
+  const order = shuffle(item.opts.map((text,i)=>({text, isCorrect:i===item.a})));
+  return order;
+}
+
+function currentIslands(){
+  return GRADES[STATE.grade].islands;
+}
+
+/* ============ SELEÇÃO DE SÉRIE ============ */
+function renderGradeSelect(){
+  const grid = $('gradeGrid');
+  grid.innerHTML='';
+  Object.keys(GRADES).forEach(gradeKey=>{
+    const g = GRADES[gradeKey];
+    const card = document.createElement('div');
+    card.className='grade-card';
+    card.innerHTML = `<div class="num">${gradeKey}º</div><div class="lbl">${g.label}</div><div class="desc">${g.desc}</div>`;
+    card.addEventListener('click', ()=>selectGrade(gradeKey));
+    grid.appendChild(card);
+  });
+}
+
+function selectGrade(gradeKey){
+  STATE.grade = gradeKey;
+  STATE.unlocked = 0;
+  STATE.gems = 0;
+  STATE.islandStars = {};
+  $('gemCount').textContent = 0;
+  $('gradePill').textContent = GRADES[gradeKey].label;
+  $('gradePill').classList.remove('hidden');
+  $('gradeView').classList.add('hidden');
+  $('mapView').classList.remove('hidden');
+  renderMap();
+}
+
+$('brandLogo').addEventListener('click', ()=>{
+  $('mapView').classList.add('hidden');
+  $('quizView').classList.add('hidden');
+  $('resultView').classList.add('hidden');
+  $('gradeView').classList.remove('hidden');
+  $('gradePill').classList.add('hidden');
+});
+$('gradePill').addEventListener('click', ()=>{
+  $('mapView').classList.add('hidden');
+  $('gradeView').classList.remove('hidden');
+  $('gradePill').classList.add('hidden');
+});
+
+/* ============ RENDER MAPA ============ */
+function renderMap(){
+  const wrap = $('islandsList');
+  wrap.innerHTML='';
+  currentIslands().forEach((isl, idx)=>{
+    const locked = idx > STATE.unlocked;
+    const done = STATE.islandStars[isl.id] !== undefined;
+    const row = document.createElement('div');
+    row.className = 'island-row' + (idx % 2 === 1 ? ' reverse' : '');
+
+    const btn = document.createElement('button');
+    btn.className = 'island-btn' + (locked ? ' locked' : '') + (done ? ' done' : '');
+    btn.innerHTML = `<span class="emoji">${isl.emoji}</span><span class="lbl">${isl.name}</span>`;
+    if(done){
+      const s = STATE.islandStars[isl.id];
+      const mini = document.createElement('span');
+      mini.className='stars-mini';
+      mini.textContent = '⭐'.repeat(s) + '☆'.repeat(3-s);
+      btn.appendChild(mini);
+    }
+    if(!locked){
+      btn.addEventListener('click', ()=>startIsland(idx));
+    }
+
+    const caption = document.createElement('div');
+    caption.className='island-caption';
+    caption.textContent = locked ? 'Bloqueado — complete a ilha anterior' : isl.caption;
+
+    row.appendChild(btn);
+    row.appendChild(caption);
+    wrap.appendChild(row);
+  });
+}
+
+/* ============ QUIZ ============ */
+function startIsland(idx){
+  STATE.current = idx;
+  const isl = currentIslands()[idx];
+  const n = Math.min(QUESTIONS_PER_ROUND, isl.pool.length);
+  STATE.quizQuestions = shuffle(isl.pool).slice(0,n).map(item=>({
+    text:item.q,
+    options: buildShuffledOptions(item)
+  }));
+  STATE.qIndex = 0;
+  STATE.correctCount = 0;
+  STATE.hearts = 3;
+  updateHeartsUI();
+  $('mapView').classList.add('hidden');
+  $('resultView').classList.add('hidden');
+  $('quizView').classList.remove('hidden');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  STATE.answered = false;
+  const q = STATE.quizQuestions[STATE.qIndex];
+  $('questionText').textContent = q.text;
+  $('qCounter').textContent = `${STATE.qIndex+1}/${STATE.quizQuestions.length}`;
+  $('progressFill').style.width = `${(STATE.qIndex/STATE.quizQuestions.length)*100}%`;
+  $('feedback').textContent = '';
+  $('feedback').className = 'feedback';
+  $('nextBtn').classList.add('hidden');
+
+  const optWrap = $('optionsList');
+  optWrap.innerHTML='';
+  q.options.forEach(opt=>{
+    const b = document.createElement('button');
+    b.className='opt-btn';
+    b.textContent = opt.text;
+    b.addEventListener('click', ()=>handleAnswer(b, opt.isCorrect));
+    optWrap.appendChild(b);
+  });
+}
+
+function handleAnswer(btn, isCorrect){
+  if(STATE.answered) return;
+  STATE.answered = true;
+  const buttons = document.querySelectorAll('.opt-btn');
+  buttons.forEach(b=>b.disabled=true);
+
+  if(isCorrect){
+    btn.classList.add('correct');
+    STATE.correctCount++;
+    STATE.gems += 5;
+    $('gemCount').textContent = STATE.gems;
+    $('feedback').textContent = '✅ Correto! Bom trabalho, explorador(a)!';
+    $('feedback').className = 'feedback good';
+  } else {
+    btn.classList.add('wrong');
+    buttons.forEach(b=>{ if(b.textContent === correctTextOf()) b.classList.add('correct'); });
+    STATE.hearts--;
+    updateHeartsUI(true);
+    $('feedback').textContent = '❌ Não foi essa. Continue tentando!';
+    $('feedback').className = 'feedback bad';
+  }
+  $('nextBtn').classList.remove('hidden');
+
+  function correctTextOf(){
+    const q = STATE.quizQuestions[STATE.qIndex];
+    return q.options.find(o=>o.isCorrect).text;
+  }
+}
+
+function updateHeartsUI(shake){
+  const pill = $('heartsPill');
+  pill.textContent = '❤️'.repeat(Math.max(STATE.hearts,0)) + '🖤'.repeat(3-Math.max(STATE.hearts,0));
+  if(shake){
+    pill.classList.remove('shake');
+    requestAnimationFrame(()=>pill.classList.add('shake'));
+  }
+  if(STATE.hearts <= 0){
+    setTimeout(()=>finishIsland(true), 600);
+  }
+}
+
+$('nextBtn').addEventListener('click', ()=>{
+  if(STATE.hearts <= 0) return;
+  STATE.qIndex++;
+  if(STATE.qIndex >= STATE.quizQuestions.length){
+    finishIsland(false);
+  } else {
+    renderQuestion();
+  }
+});
+
+$('backBtn').addEventListener('click', ()=>{
+  $('quizView').classList.add('hidden');
+  $('mapView').classList.remove('hidden');
+});
+
+function finishIsland(failed){
+  $('progressFill').style.width = '100%';
+  const isl = currentIslands()[STATE.current];
+  const total = STATE.quizQuestions.length;
+  const ratio = STATE.correctCount / total;
+  let stars = 1;
+  if (ratio >= 0.9) stars = 3;
+  else if (ratio >= 0.6) stars = 2;
+
+  $('quizView').classList.add('hidden');
+  $('resultView').classList.remove('hidden');
+
+  if(failed){
+    $('trophyEmoji').textContent = '💧';
+    $('resultTitle').textContent = 'Sem corações... tente de novo!';
+    $('resultStars').textContent = '☆☆☆';
+    $('resultStats').textContent = `Você acertou ${STATE.correctCount} de ${total} perguntas em ${isl.name}.`;
+  } else {
+    const prevStars = STATE.islandStars[isl.id];
+    if(prevStars === undefined || stars > prevStars){
+      STATE.islandStars[isl.id] = stars;
+    }
+    if(STATE.unlocked === STATE.current && STATE.unlocked < currentIslands().length - 1){
+      STATE.unlocked++;
+    }
+    STATE.gems += stars * 10;
+    $('gemCount').textContent = STATE.gems;
+
+    $('trophyEmoji').textContent = stars === 3 ? '🏆' : stars === 2 ? '🥈' : '🥉';
+    $('resultTitle').textContent = `${isl.name} concluída!`;
+    $('resultStars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3-stars);
+    $('resultStats').textContent = `Você acertou ${STATE.correctCount} de ${total} perguntas. +${stars*10} 💎 de bônus!`;
+    if(stars === 3) launchConfetti();
+  }
+}
+
+$('continueBtn').addEventListener('click', ()=>{
+  $('resultView').classList.add('hidden');
+  $('mapView').classList.remove('hidden');
+  renderMap();
+});
+
+/* ============ CONFETTI ============ */
+function launchConfetti(){
+  const colors = ['#D9A22A','#E8634F','#5FAE6C','#7FE3D6','#F2E2B8'];
+  for(let i=0;i<40;i++){
+    const p = document.createElement('div');
+    p.className='confetti-piece';
+    p.style.left = Math.random()*100 + 'vw';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDuration = (2 + Math.random()*1.5) + 's';
+    p.style.transform = `rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 4000);
+  }
+}
+
+/* ============ INIT ============ */
+updateHeartsUI();
+renderGradeSelect();
+
+})();
+</script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
