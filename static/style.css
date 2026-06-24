@@ -1,4 +1,4 @@
-:root{
+ :root{
     --jungle:#0F3D3E;
     --jungle-deep:#0A2C2D;
     --gold:#D9A22A;
@@ -45,7 +45,7 @@
   }
   @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
   .stats{
-    display:flex;gap:10px;
+    display:flex;gap:10px; flex-wrap:wrap;
     font-family:var(--font-display);
     font-weight:700;
   }
@@ -61,6 +61,9 @@
   .pill.hearts{color:#FF8B7E;}
   .pill.gems{color:#7FE3D6;}
   .pill.grade{color:var(--gold); cursor:pointer;}
+  .pill.ranking-btn{color:var(--gold); cursor:pointer; border-color:var(--gold);}
+  .pill.ranking-btn:hover{background:rgba(217,162,42,0.18);}
+  .pill.player{color:#bcd9ff; cursor:pointer;}
 
   .map-title{
     text-align:center;
@@ -139,12 +142,19 @@
     flex:1; height:16px; background:rgba(0,0,0,0.3); border-radius:8px; overflow:hidden; min-width:160px;
   }
   .progress-fill{height:100%; background:linear-gradient(90deg,var(--coral),var(--gold)); transition:width .3s ease;}
+  .level-tag{
+    font-family:var(--font-display); font-size:0.85rem; font-weight:700;
+    display:inline-block; padding:4px 12px; border-radius:999px; margin-bottom:10px;
+  }
+  .level-tag.l1{background:rgba(95,174,108,0.25); color:#9EE6A8;}
+  .level-tag.l2{background:rgba(217,162,42,0.25); color:var(--gold);}
+  .level-tag.l3{background:rgba(217,83,79,0.25); color:#FFA39C;}
   .question-text{
     font-family:var(--font-display);
     font-size:2rem;
     line-height:1.4;
     color:#fff;
-    margin:20px 0 30px;
+    margin:6px 0 30px;
     text-align:center;
   }
   .options{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
@@ -201,3 +211,45 @@
   @keyframes fall{
     to{transform:translateY(110vh) rotate(540deg); opacity:0.2;}
   }
+
+  /* ---------- MODAL JOGADOR ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,0.6);
+    display:flex; align-items:center; justify-content:center; z-index:100; padding:20px;
+  }
+  .modal-box{
+    background:linear-gradient(160deg, var(--teal-light), var(--jungle-deep));
+    border:3px solid var(--gold); border-radius:24px; padding:30px; max-width:380px; width:100%;
+  }
+  .modal-box h3{font-family:var(--font-display); color:var(--gold); margin-top:0;}
+  .modal-box label{display:block; font-weight:700; margin:14px 0 6px; font-size:0.95rem;}
+  .modal-box input{
+    width:100%; padding:12px 14px; border-radius:12px; border:2px solid rgba(217,162,42,0.5);
+    background:rgba(0,0,0,0.25); color:var(--sand); font-size:1.05rem; font-family:var(--font-body);
+  }
+  .modal-box input:focus{outline:none; border-color:var(--gold);}
+  .modal-box .hint{font-size:0.8rem; opacity:0.7; margin-top:4px;}
+  .modal-actions{margin-top:22px; display:flex; justify-content:flex-end;}
+
+  /* ---------- RANKING ---------- */
+  .ranking-card{padding:8px 0 0;}
+  .ranking-tabs{display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;}
+  .ranking-tab{
+    font-family:var(--font-display); font-weight:700; font-size:0.95rem;
+    background:rgba(0,0,0,0.25); border:2px solid rgba(217,162,42,0.4); color:var(--sand);
+    border-radius:999px; padding:8px 16px; cursor:pointer;
+  }
+  .ranking-tab.active{background:var(--gold); color:var(--jungle-deep); border-color:var(--gold);}
+  .ranking-list{display:flex; flex-direction:column; gap:8px;}
+  .ranking-row{
+    display:flex; align-items:center; gap:14px;
+    background:rgba(0,0,0,0.2); border-radius:14px; padding:12px 16px;
+    border:2px solid rgba(217,162,42,0.25);
+  }
+  .ranking-row.me{border-color:var(--gold); background:rgba(217,162,42,0.12);}
+  .ranking-pos{font-family:var(--font-display); font-weight:800; font-size:1.3rem; color:var(--gold); width:34px; text-align:center;}
+  .ranking-info{flex:1;}
+  .ranking-name{font-weight:800; font-size:1.1rem;}
+  .ranking-sub{font-size:0.85rem; opacity:0.7;}
+  .ranking-gems{font-family:var(--font-display); font-weight:800; color:#7FE3D6; font-size:1.2rem;}
+  .ranking-empty{text-align:center; opacity:0.7; padding:20px;}
