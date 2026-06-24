@@ -253,3 +253,30 @@
   .ranking-sub{font-size:0.85rem; opacity:0.7;}
   .ranking-gems{font-family:var(--font-display); font-weight:800; color:#7FE3D6; font-size:1.2rem;}
   .ranking-empty{text-align:center; opacity:0.7; padding:20px;}
+
+  /* ---------- MARCA D'ÁGUA / CRÉDITO ---------- */
+  .credit-badge{
+    position:fixed; bottom:16px; right:16px; z-index:60;
+    display:flex; align-items:center; gap:8px;
+    background:rgba(10,44,45,0.85);
+    border:2px solid rgba(217,162,42,0.5);
+    border-radius:999px;
+    padding:8px 14px 8px 10px;
+    text-decoration:none;
+    color:var(--sand);
+    font-family:var(--font-body); font-weight:700; font-size:0.85rem;
+    backdrop-filter:blur(4px);
+    transition:transform .15s ease, border-color .2s ease;
+  }
+  .credit-badge:hover{transform:translateY(-2px); border-color:var(--gold);}
+  .credit-badge svg{width:18px; height:18px; fill:var(--sand); flex-shrink:0;}
+  .footer-credit{
+    display:inline-flex; align-items:center; gap:5px;
+    color:var(--gold); text-decoration:none; font-weight:700;
+  }
+  .footer-credit:hover{text-decoration:underline;}
+  .footer-credit svg{width:13px; height:13px; fill:var(--gold); vertical-align:-2px;}
+  @media (max-width:480px){
+    .credit-badge span{display:none;}
+    .credit-badge{padding:8px;}
+  }
