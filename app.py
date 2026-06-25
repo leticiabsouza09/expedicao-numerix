@@ -21,12 +21,25 @@ app = Flask(__name__)
 TURSO_URL = os.environ.get("TURSO_DATABASE_URL")
 TURSO_AUTH_TOKEN = os.environ.get("TURSO_AUTH_TOKEN")
 
+
+def _to_http_url(url):
+    """
+    O client Python (libsql_client) tem um bug conhecido de handshake ao usar
+    WebSocket (wss://, vindo de libsql://) em bancos hospedados em regiões
+    específicas do Turso. Forçar o transporte HTTP (https://) evita o erro
+    'WSServerHandshakeError: Invalid response status'.
+    """
+    if url and url.startswith("libsql://"):
+        return "https://" + url[len("libsql://"):]
+    return url
+
+
 if TURSO_URL:
     db_client = libsql_client.create_client_sync(
-        url=TURSO_URL,
+        url=_to_http_url(TURSO_URL),
         auth_token=TURSO_AUTH_TOKEN,
     )
-    print("Conectado ao Turso (banco remoto).")
+    print("Conectado ao Turso (banco remoto, via HTTP).")
 else:
     local_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ranking_local.db")
     db_client = libsql_client.create_client_sync(url=f"file:{local_path}")
